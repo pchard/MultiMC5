@@ -18,6 +18,8 @@
 #include <QMessageBox>
 #include <QStringList>
 #include <QDebug>
+#include <QStyle>
+
 
 #include "InstanceList.h"
 #include <minecraft/auth/MojangAccountList.h>
@@ -90,6 +92,23 @@ MultiMC::MultiMC(int &argc, char **argv, bool test_mode) : QApplication(argc, ar
 #endif
 	setOrganizationName("MultiMC");
 	setApplicationName("MultiMC5");
+	defaultStyle = qApp->style();
+	defaultPalette = qApp->palette();
+	/*
+	QPalette darkPalette;
+	darkPalette.setColor(QPalette::Window, QColor(53,53,53));
+	darkPalette.setColor(QPalette::WindowText, Qt::white);
+	darkPalette.setColor(QPalette::Base, QColor(25,25,25));
+	darkPalette.setColor(QPalette::AlternateBase, QColor(53,53,53));
+	darkPalette.setColor(QPalette::ToolTipBase, Qt::white);
+	darkPalette.setColor(QPalette::ToolTipText, Qt::white);
+	darkPalette.setColor(QPalette::Text, Qt::white);
+	darkPalette.setColor(QPalette::Button, QColor(53,53,53));
+	darkPalette.setColor(QPalette::ButtonText, Qt::white);
+	darkPalette.setColor(QPalette::BrightText, Qt::red);
+	darkPalette.setColor(QPalette::Link, QColor(42, 130, 218));
+	setPalette(darkPalette);
+	*/
 
 	startTime = QDateTime::currentDateTime();
 
@@ -220,6 +239,43 @@ MultiMC::MultiMC(int &argc, char **argv, bool test_mode) : QApplication(argc, ar
 	qDebug() << "Binary path                : " << binPath;
 	qDebug() << "Application root path      : " << rootPath;
 
+	const char *paletteNames[]=
+	{
+		"WindowText",
+		"Button",
+		"Light",
+		"Midlight",
+		"Dark",
+		"Mid",
+		"Text",
+		"BrightText",
+		"ButtonText",
+		"Base",
+		"Window",
+		"Shadow",
+		"Highlight",
+		"HighlightedText",
+		"Link",
+		"LinkVisited",
+		"AlternateBase",
+		"NoRole",
+		"ToolTipBase",
+		"ToolTipText"
+	};
+	for (int colorIndex = QPalette::WindowText; colorIndex < QPalette::NColorRoles ; colorIndex++)
+	{
+		auto colorRole = (QPalette::ColorRole)colorIndex;
+		auto & colorNormal = defaultPalette.color(colorRole);
+		auto & colorActive = defaultPalette.color(QPalette::Active, colorRole);
+		auto & colorInactive = defaultPalette.color(QPalette::Inactive, colorRole);
+		auto & colorDisabled = defaultPalette.color(QPalette::Disabled, colorRole);
+		qDebug() << paletteNames[colorIndex]
+			<< colorNormal.name(QColor::NameFormat::HexRgb)
+			<< colorActive.name(QColor::NameFormat::HexRgb)
+			<< colorInactive.name(QColor::NameFormat::HexRgb)
+			<< colorDisabled.name(QColor::NameFormat::HexRgb);
+	}
+
 	// load settings
 	initGlobalSettings(test_mode);
 
@@ -311,15 +367,6 @@ MultiMC::~MultiMC()
 	{
 		removeTranslator(m_qt_translator.get());
 	}
-#if defined Q_OS_WIN32
-	if(consoleAttached)
-	{
-		const char * endline = "\n";
-		auto out = GetStdHandle (STD_OUTPUT_HANDLE);
-		DWORD written;
-		WriteConsole(out, endline, strlen(endline), &written, NULL);
-	}
-#endif
 }
 
 #ifdef Q_OS_MAC
@@ -498,11 +545,6 @@ void MultiMC::initGlobalSettings(bool test_mode)
 	m_settings->registerSetting("RaiseConsole", true);
 	m_settings->registerSetting("AutoCloseConsole", true);
 	m_settings->registerSetting("LogPrePostOutput", true);
-
-	// Console Colors
-	//	m_settings->registerSetting("SysMessageColor", QColor(Qt::blue));
-	//	m_settings->registerSetting("StdOutColor", QColor(Qt::black));
-	//	m_settings->registerSetting("StdErrColor", QColor(Qt::red));
 
 	// Window Size
 	m_settings->registerSetting({"LaunchMaximized", "MCWindowMaximize"}, false);

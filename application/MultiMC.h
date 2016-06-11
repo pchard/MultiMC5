@@ -5,6 +5,7 @@
 #include <QDebug>
 #include <QFlag>
 #include <QIcon>
+#include <QPalette>
 #include <QDateTime>
 #include <updater/GoUpdate.h>
 
@@ -178,6 +179,9 @@ private:
 	Status m_status = MultiMC::Failed;
 
 	bool consoleAttached = false;
+
+	QStyle * defaultStyle = nullptr;
+	QPalette defaultPalette;
 public:
 	QString launchId;
 	std::shared_ptr<QFile> logFile;
